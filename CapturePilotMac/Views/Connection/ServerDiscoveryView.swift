@@ -181,15 +181,7 @@ struct ManualConnectionView: View {
                 TextField("Port", text: $connectionVM.manualPort)
                     .textFieldStyle(DarkTextFieldStyle())
                     .frame(width: 60)
-            }
 
-            if connectionVM.showPasswordField {
-                SecureField("Password (optional)", text: $connectionVM.password)
-                    .textFieldStyle(DarkTextFieldStyle())
-                    .frame(width: 256)
-            }
-
-            HStack(spacing: 8) {
                 if connectionVM.isConnecting {
                     ProgressView()
                         .scaleEffect(0.7)
@@ -215,6 +207,12 @@ struct ManualConnectionView: View {
                     .disabled(connectionVM.manualHost.isEmpty)
                     .opacity(connectionVM.manualHost.isEmpty ? 0.5 : 1.0)
                 }
+            }
+
+            if connectionVM.showPasswordField {
+                SecureField("Password (optional)", text: $connectionVM.password)
+                    .textFieldStyle(DarkTextFieldStyle())
+                    .frame(width: 256)
             }
 
             // Connection status feedback

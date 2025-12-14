@@ -1,6 +1,5 @@
 ## TODOS
 
-- [ ] The connect button on the first screen should sit on the same line as the address fields
 - [ ] Add settings. Show/hide: color tag, rating, exif
 - [x] Add left/right padding to the images in the sidebar
     - [x] Increase the padding further
@@ -14,6 +13,7 @@
 
 ## COMPLETED
 
+- [x] The connect button on the first screen should sit on the same line as the address fields
 - [x] Allow rating of images with keyboard 0-5
 - [x] Fix the Selects button appearance: the text "Selects" is currently split over two lines
     - [x] Make the "S" the same size as the S in Selects
