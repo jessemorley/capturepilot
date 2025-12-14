@@ -52,6 +52,7 @@ struct GalleryView: View {
                             RatingColorHUDView()
                                 .environmentObject(viewerVM)
                                 .environmentObject(galleryVM)
+                                .environmentObject(preferencesVM)
                                 .padding(.bottom, 20)
                         }
                     }
@@ -177,7 +178,7 @@ struct TopBarView: View {
             Spacer()
 
             // Center: Title
-            Text("Capture Folder")
+            Text(galleryVM.collectionName)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(.white)
 
@@ -306,11 +307,17 @@ struct SettingsModalView: View {
 
                     Toggle("Auto-navigate to new images", isOn: $preferencesVM.autoNavigateToNewImages)
                 }
+
+                Section("HUD Display") {
+                    Toggle("Show star rating", isOn: $preferencesVM.showRatingInHUD)
+                    Toggle("Show color tag", isOn: $preferencesVM.showColorTagInHUD)
+                    Toggle("Show EXIF info", isOn: $preferencesVM.showExifInHUD)
+                }
             }
             .formStyle(.grouped)
             .scrollContentBackground(.hidden)
         }
-        .frame(width: 350, height: 250)
+        .frame(width: 350, height: 350)
         .background(Color(white: 0.15))
     }
 }

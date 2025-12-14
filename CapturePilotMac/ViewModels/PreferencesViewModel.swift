@@ -5,6 +5,9 @@ final class PreferencesViewModel: ObservableObject {
     @AppStorage("lastServerHost") var lastServerHost: String = ""
     @AppStorage("lastServerPort") var lastServerPort: Int = 8080
     @AppStorage("thumbnailHeight") var thumbnailHeight: Double = 80
+    @AppStorage("showRatingInHUD") var showRatingInHUD: Bool = true
+    @AppStorage("showColorTagInHUD") var showColorTagInHUD: Bool = true
+    @AppStorage("showExifInHUD") var showExifInHUD: Bool = true
 
     enum ThumbnailSize: String, CaseIterable {
         case small = "Small"

@@ -3,66 +3,74 @@ import SwiftUI
 struct RatingColorHUDView: View {
     @EnvironmentObject var viewerVM: ImageViewerViewModel
     @EnvironmentObject var galleryVM: GalleryViewModel
+    @EnvironmentObject var preferencesVM: PreferencesViewModel
 
     var body: some View {
+        // Don't show HUD if all options are disabled
+        if !preferencesVM.showRatingInHUD && !preferencesVM.showColorTagInHUD && !preferencesVM.showExifInHUD {
+            return AnyView(EmptyView())
+        }
+
         if let variant = viewerVM.currentVariant {
-            VStack(spacing: 12) {
-                Text(variant.name)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.white)
-                
+            return AnyView(
                 HStack(spacing: 16) {
                     // RATE section
-                    HStack(spacing: 8) {
-                        Text("RATE")
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundColor(Color(white: 0.4))
-                            .tracking(0.5)
+                    if preferencesVM.showRatingInHUD {
+                        HStack(spacing: 8) {
+                            Text("RATE")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(Color(white: 0.7))
+                                .tracking(0.5)
 
-                        // Rating stars (compact)
-                        HUDRatingView(
-                            currentRating: variant.rating,
-                            isEnabled: galleryVM.canSetRating
-                        ) { rating in
-                            viewerVM.setRating(rating)
+                            // Rating stars (compact)
+                            HUDRatingView(
+                                currentRating: variant.rating,
+                                isEnabled: galleryVM.canSetRating
+                            ) { rating in
+                                viewerVM.setRating(rating)
+                            }
                         }
                     }
 
                     // TAG section
-                    HStack(spacing: 8) {
-                        Text("TAG")
-                            .font(.system(size: 10, weight: .semibold))
-                            .foregroundColor(Color(white: 0.4))
-                            .tracking(0.5)
+                    if preferencesVM.showColorTagInHUD {
+                        HStack(spacing: 8) {
+                            Text("TAG")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(Color(white: 0.7))
+                                .tracking(0.5)
 
-                        // Color tag dot
-                        ColorTagDotView(
-                            currentTag: variant.colorTag,
-                            isEnabled: galleryVM.canSetColorTag
-                        ) { tag in
-                            viewerVM.setColorTag(tag)
+                            // Color tag dot
+                            ColorTagDotView(
+                                currentTag: variant.colorTag,
+                                isEnabled: galleryVM.canSetColorTag
+                            ) { tag in
+                                viewerVM.setColorTag(tag)
+                            }
                         }
                     }
 
                     // EXIF info
-                    if !variant.exifSummary.isEmpty {
+                    if preferencesVM.showExifInHUD && !variant.exifSummary.isEmpty {
                         Text(variant.exifSummary)
                             .font(.system(size: 11))
-                            .foregroundColor(Color(white: 0.4))
+                            .foregroundColor(Color(white: 0.7))
                             .lineLimit(1)
                     }
                 }
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .background(
-                Capsule()
-                    .fill(Color.black.opacity(0.7))
-                    .overlay(
-                        Capsule()
-                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                    )
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(.bar)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        )
+                )
             )
+        } else {
+            return AnyView(EmptyView())
         }
     }
 }

@@ -19,6 +19,12 @@ struct PreferencesView: View {
                 .pickerStyle(.segmented)
             }
 
+            Section("HUD Display") {
+                Toggle("Show star rating", isOn: $preferencesVM.showRatingInHUD)
+                Toggle("Show color tag", isOn: $preferencesVM.showColorTagInHUD)
+                Toggle("Show EXIF info", isOn: $preferencesVM.showExifInHUD)
+            }
+
             Section("Connection") {
                 LabeledContent("Last Server") {
                     if preferencesVM.lastServerHost.isEmpty {
@@ -37,7 +43,7 @@ struct PreferencesView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 400, height: 300)
+        .frame(width: 400, height: 350)
     }
 }
 
