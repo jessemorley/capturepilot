@@ -6,12 +6,15 @@ A native macOS app for remote image viewing and rating with Capture One Pro.
 
 - **Bonjour Discovery** - Automatically discovers Capture One servers on your network
 - **Real-time Updates** - See new captures instantly via long-polling
-- **Image Navigation** - Arrow keys, click thumbnails, or hover screen edges
+- **Multi-Select** - Select multiple images with Cmd+Click for comparison
+- **Image Navigation** - Arrow keys, Space, Home/End, or click thumbnails
 - **Rating System** - Rate 0-5 stars with keyboard (0-5 keys) or UI
 - **Color Tags** - Apply all 8 Capture One color tags (-, +, * shortcuts)
+- **Selects Filter** - Toggle view of 3+ star images only (S key)
 - **Auto-Update Toggle** - Auto-navigate to new images (default ON)
+- **Sidebar Thumbnails** - Vertical thumbnail strip with filenames
+- **Always-Visible HUD** - Compact rating, color tag, and EXIF display
 - **Dark Mode** - Native dark theme throughout
-- **Auto-hiding Controls** - Controls fade after 3 seconds
 
 ## Requirements
 
@@ -44,9 +47,9 @@ A native macOS app for remote image viewing and rating with Capture One Pro.
 ### Keyboard Shortcuts
 
 #### Navigation
-- `←` / `→` - Previous/Next image
-- `Space` - Next image
-- `Home` / `End` - First/Last image
+- `←` / `→` - Previous/Next image (exits multi-select)
+- `Space` - Next image (exits multi-select)
+- `Home` / `End` - First/Last image (exits multi-select)
 
 #### Rating
 - `0` - Clear rating
@@ -54,16 +57,21 @@ A native macOS app for remote image viewing and rating with Capture One Pro.
 
 #### Color Tags
 - `-` - Red tag
-- `+` - Green tag
+- `+` / `=` - Green tag
 - `*` - Yellow tag
+
+#### Filters
+- `S` - Toggle "Selects" filter (3+ stars only)
 
 ### UI Controls
 
+- **Selects Button** - Filter to show only 3+ star images
 - **Auto Toggle** - Enable/disable auto-navigation to new images
+- **Sidebar Toggle** - Show/hide thumbnail sidebar (☰ button)
 - **Rating Stars** - Click to rate 0-5 stars
-- **Color Tag Circle** - Click to expand color tag picker
-- **Thumbnail Strip** - Click any thumbnail to view
-- **Screen Edges** - Hover left/right edge to show navigation arrows
+- **Color Tag Dot** - Click to expand color tag picker
+- **Thumbnails** - Click to view, Cmd+Click to multi-select
+- **Multi-Image Grid** - Click any image to make it active for rating/tagging
 
 ## Architecture
 

@@ -201,7 +201,20 @@ var showSelectsOnly: Bool         // Filter to show only 3+ stars
   - 1 image: Full viewport, object-fit contain
   - 2-3 images: Horizontal flex layout, fills height
   - 4+ images: Grid layout (2×2, 3×3, or 4×4), non-scrollable
-- **Click image in grid**: Makes it the active image
+- **Click image in grid**: Makes it the active image (without exiting multi-select mode)
+
+## Metadata Updates & Real-Time Sync
+
+When rating or color tags are changed:
+
+1. `ImageViewerViewModel.setRating()` sends update to server via `CapturePilotClient`
+2. Server processes change and sends back metadata update via long-polling
+3. `GalleryViewModel` receives change with type `"metadata"`
+4. `GalleryViewModel` updates variant in local cache and publishes to `variantsModified`
+5. `ImageViewerViewModel` subscribes to `variantsModified` and updates `currentVariant`
+6. HUD automatically re-renders with updated values
+
+**Important**: Both `"modified"` and `"metadata"` change types must be published to `variantsModified` for HUD to update correctly.
 
 ## Keyboard Shortcuts
 
@@ -228,8 +241,8 @@ var showSelectsOnly: Bool         // Filter to show only 3+ stars
   - Button background: `#1A1A1A`
   - Button hover: `#262626`
   - Borders: `rgba(255,255,255,0.1)` or `0.15`
-- **Sidebar**: Fixed 180px width on right side with header and filename labels
-- **HUD**: Compact bar with "RATE" and "TAG" labels, semi-transparent background
+- **Sidebar**: Fixed 180px width on right side with header and filename labels, 12px horizontal padding
+- **HUD**: Compact bar with "RATE" and "TAG" labels, semi-transparent background, 12px vertical spacing
 - **Visual feedback**:
   - Active thumbnail: White 2px border, full opacity
   - Selected thumbnail: White 50% opacity border
