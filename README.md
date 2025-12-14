@@ -13,7 +13,7 @@ A native macOS app for remote image viewing and rating with Capture One Pro.
 - **Selects Filter** - Toggle view of 3+ star images only (S key)
 - **Auto-Update Toggle** - Auto-navigate to new images (default ON)
 - **Sidebar Thumbnails** - Vertical thumbnail strip with filenames
-- **Always-Visible HUD** - Compact rating, color tag, and EXIF display
+- **Customizable HUD** - Toggle visibility of rating, color tag, and EXIF display
 - **Dark Mode** - Native dark theme throughout
 
 ## Requirements
@@ -65,6 +65,7 @@ A native macOS app for remote image viewing and rating with Capture One Pro.
 
 ### UI Controls
 
+- **Settings Button** - Open settings modal (⚙ gear icon in top-left)
 - **Selects Button** - Filter to show only 3+ star images
 - **Auto Toggle** - Enable/disable auto-navigation to new images
 - **Sidebar Toggle** - Show/hide thumbnail sidebar (☰ button)
@@ -72,6 +73,21 @@ A native macOS app for remote image viewing and rating with Capture One Pro.
 - **Color Tag Dot** - Click to expand color tag picker
 - **Thumbnails** - Click to view, Cmd+Click to multi-select
 - **Multi-Image Grid** - Click any image to make it active for rating/tagging
+
+### Settings
+
+Access settings via the gear icon (⚙) in the top-left corner or via Preferences window:
+
+#### Display
+- **Thumbnail Size** - Choose Small (60px), Medium (80px), or Large (100px)
+- **Auto-navigate to new images** - Automatically switch to newly captured images
+
+#### HUD Display
+- **Show star rating** - Toggle rating stars in HUD
+- **Show color tag** - Toggle color tag indicator in HUD
+- **Show EXIF info** - Toggle camera settings (aperture, shutter, ISO, focal length) in HUD
+
+**Note**: If all HUD elements are disabled, the entire HUD is hidden.
 
 ## Architecture
 

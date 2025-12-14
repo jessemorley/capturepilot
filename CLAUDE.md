@@ -243,6 +243,8 @@ When rating or color tags are changed:
   - Borders: `rgba(255,255,255,0.1)` or `0.15`
 - **Sidebar**: Fixed 180px width on right side with header and filename labels, 12px horizontal padding
 - **HUD**: Compact bar with "RATE" and "TAG" labels, semi-transparent background, 12px vertical spacing
+  - Individual elements (rating, color tag, EXIF) can be shown/hidden via preferences
+  - Entire HUD hidden when all elements are disabled
 - **Visual feedback**:
   - Active thumbnail: White 2px border, full opacity
   - Selected thumbnail: White 50% opacity border
@@ -277,7 +279,12 @@ The app communicates with Capture One via HTTP:
 
 Stored via `@AppStorage`:
 - `thumbnailHeight` (Double, default: 80) - Thumbnail size
-- `autoNavigateToNewImages` (Bool) - Auto-select new captures
+- `autoNavigateToNewImages` (Bool, default: true) - Auto-select new captures
+- `showRatingInHUD` (Bool, default: true) - Show star rating in HUD
+- `showColorTagInHUD` (Bool, default: true) - Show color tag in HUD
+- `showExifInHUD` (Bool, default: true) - Show EXIF info in HUD
+
+**Note**: If all three HUD visibility options (`showRatingInHUD`, `showColorTagInHUD`, `showExifInHUD`) are disabled, the entire HUD is hidden.
 
 ## Adding New Files to Xcode Project
 
