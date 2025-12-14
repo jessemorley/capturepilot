@@ -26,8 +26,8 @@ CapturePilotMac/
 ├── ViewModels/
 │   ├── AppViewModel.swift             # Root state container
 │   ├── ConnectionViewModel.swift      # Server discovery/auth
-│   ├── GalleryViewModel.swift         # Image list + thumbnails
-│   ├── ImageViewerViewModel.swift     # Current image state
+│   ├── GalleryViewModel.swift         # Image list + thumbnails + multi-select state
+│   ├── ImageViewerViewModel.swift     # Current image state (syncs with active variant)
 │   └── PreferencesViewModel.swift     # User settings
 ├── Views/
 │   ├── MainView.swift                 # Root view (state-based switching)
@@ -36,15 +36,26 @@ CapturePilotMac/
 │   │   └── ServerDiscoveryView.swift  # Server list/connection UI
 │   ├── Gallery/
 │   │   ├── GalleryView.swift          # Main gallery container
+│   │   │   ├── TopBarView             # Top bar with settings/selects/toggles
+│   │   │   ├── SelectsButton          # Selects filter button
+│   │   │   ├── NextCaptureToggle      # Auto-navigate toggle
+│   │   │   └── SettingsModalView      # Settings modal
 │   │   ├── ThumbnailStripView.swift   # Thumbnail item component
-│   │   └── VerticalThumbnailStripView.swift  # Vertical film strip
+│   │   └── VerticalThumbnailStripView.swift  # Sidebar (right edge)
+│   │       ├── SidebarView            # 180px sidebar container
+│   │       ├── SidebarHeaderView      # FOLDER header with count
+│   │       └── SidebarThumbnailView   # Thumbnail with filename label
 │   ├── Viewer/
-│   │   ├── ImageViewerView.swift      # Full-screen image display
-│   │   └── ImageNavigationView.swift  # Left/right edge hotspots
+│   │   └── ImageViewerView.swift      # Single/multi image display
+│   │       ├── MultiImageView         # Grid/flex layout for multi-select
+│   │       └── MultiImageItemView     # Individual grid item
 │   └── Controls/
 │       ├── RatingControlView.swift    # 5-star rating control
 │       ├── ColorTagControlView.swift  # Color tag picker
-│       └── RatingColorHUDView.swift   # Floating HUD overlay
+│       └── RatingColorHUDView.swift   # Compact HUD with RATE/TAG labels
+│           ├── HUDRatingView          # Compact star rating
+│           ├── ColorTagDotView        # Color dot with popover
+│           └── ColorTagPopoverView    # Color picker popover
 ├── Networking/
 │   ├── CapturePilotClient.swift       # API client for Capture One
 │   ├── ServerDiscoveryService.swift   # Bonjour service discovery
@@ -61,22 +72,23 @@ CapturePilotMac/
 ### Main Gallery Layout
 
 ```
-┌────────────────────────────────────┬──────────┐
-│  [Title Bar - ultraThinMaterial]   │ Folder   │
-│  disconnect | name | position      │ N images │
-│                                    ├──────────┤
-│                                    │ Vertical │
-│         [ImageViewerView]          │ Thumbnail│
-│         Full-screen image          │ Strip    │
-│                                    │          │
-│     [ImageNavigationView]          │ (ultra   │
-│     Left/right edge hotspots       │  Thin    │
-│                                    │ Material)│
-│     ┌─────────────────────┐        │          │
-│     │ [RatingColorHUDView]│        │          │
-│     │ EXIF|Auto|★★★|Colors│        │          │
-│     └─────────────────────┘        │          │
-└────────────────────────────────────┴──────────┘
+┌────────────────────────────────────────────────────────────┐
+│  [TopBarView - 64px height, #000000 background]            │
+│  Settings | Capture Folder | Selects | Next Capture | ☰   │
+├────────────────────────────────────┬───────────────────────┤
+│                                    │ [SidebarView]         │
+│                                    │ 180px, #050505        │
+│                                    │ ┌─────────────────┐   │
+│                                    │ │ FOLDER      [4] │   │
+│         [ImageViewerView]          │ ├─────────────────┤   │
+│         Full-screen image          │ │ □ Thumbnail     │   │
+│         or Multi-image grid        │ │   filename.RAW  │   │
+│                                    │ │ □ Thumbnail     │   │
+│     ┌─────────────────────┐        │ │   filename.RAW  │   │
+│     │ [RatingColorHUDView]│        │ │ ■ Active        │   │
+│     │ RATE ★★★ TAG ● EXIF│        │ │   filename.RAW  │   │
+│     └─────────────────────┘        │ └─────────────────┘   │
+└────────────────────────────────────┴───────────────────────┘
 ```
 
 ### View Hierarchy
@@ -86,14 +98,21 @@ MainView (state-based switching)
 ├── .disconnected → ServerDiscoveryView
 ├── .connecting → ConnectionProgressView
 ├── .connected → GalleryView
-│   ├── HStack
-│   │   ├── ZStack (main content)
-│   │   │   ├── ImageViewerView
-│   │   │   └── ImageNavigationView
-│   │   └── VerticalThumbnailStripView (right edge)
-│   └── VStack (overlays)
-│       ├── TitleBarView (top)
-│       └── RatingColorHUDView (bottom center)
+│   ├── VStack
+│   │   ├── TopBarView (64px height)
+│   │   │   ├── Settings gear (left)
+│   │   │   ├── Folder name (center)
+│   │   │   └── Selects | Next Capture | Sidebar toggle (right)
+│   │   └── HStack
+│   │       ├── ZStack (main viewport)
+│   │       │   ├── ImageViewerView
+│   │       │   │   ├── Single image view
+│   │       │   │   └── MultiImageView (2-3 flex, 4+ grid)
+│   │       │   └── VStack
+│   │       │       └── RatingColorHUDView (bottom center)
+│   │       └── SidebarView (right edge, 180px)
+│   │           ├── SidebarHeaderView (FOLDER + count)
+│   │           └── ScrollView of thumbnails with labels
 └── .error → ConnectionErrorView
 ```
 
@@ -111,11 +130,15 @@ GalleryViewModel.startPolling()
     └── Publishes variants (image metadata)
     └── Lazy-loads thumbnails on demand
     ↓
-User clicks thumbnail / navigates
+User clicks thumbnail (or Cmd+Click for multi-select)
     ↓
-ImageViewerViewModel.selectVariant(variant)
-    └── Fetches full resolution image
-    └── Updates currentImage & currentVariant
+GalleryViewModel.selectVariant(variant, isCommandPressed)
+    ├── Single click: Sets selectedVariantIDs = [variant.id]
+    └── Cmd+Click: Toggles variant in selectedVariantIDs
+    ↓
+ImageViewerViewModel observes activeVariantID changes
+    ├── If multi-select (>1 selected): Shows MultiImageView grid
+    └── If single select: Fetches full resolution image
 ```
 
 ## Key Data Models
@@ -159,25 +182,71 @@ struct CollectionProperties {
 }
 ```
 
+### GalleryViewModel Selection State
+```swift
+@Published var selectedVariantIDs: Set<UUID> = []  // All selected images
+@Published var activeVariantID: UUID?              // Active image for editing
+
+var displayedVariants: [Variant]  // Filtered by Selects if enabled
+var selectsCount: Int             // Count of 3+ star images
+var showSelectsOnly: Bool         // Filter to show only 3+ stars
+```
+
+## Multi-Select Functionality
+
+- **Click** - Selects a single image (clears previous selection)
+- **Cmd+Click** - Toggles image in multi-select (add/remove from selection)
+- **Active vs Selected**: One image is always "active" (white border) for editing ratings/tags
+- **Multi-image display**:
+  - 1 image: Full viewport, object-fit contain
+  - 2-3 images: Horizontal flex layout, fills height
+  - 4+ images: Grid layout (2×2, 3×3, or 4×4), non-scrollable
+- **Click image in grid**: Makes it the active image
+
 ## Keyboard Shortcuts
 
 | Key | Action |
 |-----|--------|
-| ← / → | Previous / Next image |
-| Home / End | First / Last image |
-| Space | Next image |
-| 0-5 | Set rating (0 = clear) |
-| - | Red color tag |
-| + / = | Green color tag |
-| * | Yellow color tag |
+| ← / → | Previous / Next image (exits multi-select) |
+| Home / End | First / Last image (exits multi-select) |
+| Space | Next image (exits multi-select) |
+| 0-5 | Set rating on active image (0 = clear) |
+| S | Toggle "Selects" filter (3+ stars only) |
+| - | Red color tag on active image |
+| + / = | Green color tag on active image |
+| * | Yellow color tag on active image |
 
-## UI Behaviors
+## UI Behaviors & Design
 
-- **Auto-hide controls**: Controls fade out after 3 seconds of inactivity
-- **Hover to show**: Mouse movement shows controls
+- **Always-visible controls**: No auto-hide behavior
 - **Lazy thumbnail loading**: Thumbnails load when scrolled into view
-- **Scroll to selected**: Thumbnail strip auto-scrolls to current image
-- **Material backgrounds**: Uses macOS vibrancy materials (`.ultraThinMaterial`, `.regularMaterial`)
+- **Scroll to active**: Sidebar auto-scrolls to active thumbnail
+- **Square edges**: All images and thumbnails have 0px border radius
+- **Dark theme**:
+  - Main background: `#000000`
+  - Sidebar background: `#050505`
+  - Button background: `#1A1A1A`
+  - Button hover: `#262626`
+  - Borders: `rgba(255,255,255,0.1)` or `0.15`
+- **Sidebar**: Fixed 180px width on right side with header and filename labels
+- **HUD**: Compact bar with "RATE" and "TAG" labels, semi-transparent background
+- **Visual feedback**:
+  - Active thumbnail: White 2px border, full opacity
+  - Selected thumbnail: White 50% opacity border
+  - Hovered thumbnail: 95% opacity
+  - Default thumbnail: 80% opacity
+
+### Color Constants (GalleryView.swift)
+```swift
+extension Color {
+    static let galleryBackground = Color(red: 0, green: 0, blue: 0)           // #000000
+    static let sidebarBackground = Color(red: 5/255, green: 5/255, blue: 5/255) // #050505
+    static let buttonBackground = Color(red: 26/255, green: 26/255, blue: 26/255) // #1A1A1A
+    static let buttonHover = Color(red: 38/255, green: 38/255, blue: 38/255) // #262626
+    static let borderSubtle = Color.white.opacity(0.1)
+    static let borderLight = Color.white.opacity(0.15)
+}
+```
 
 ## API Integration
 

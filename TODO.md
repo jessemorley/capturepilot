@@ -1,1 +1,10 @@
 - [ ] The connect button on the first screen should sit on the same line as the address fields
+- [ ] Add settings. Show/hide: color tag, rating, exif
+- [ ] Add left/right padding to the images in the sidebar
+- [ ] Fix the Selects button appearance: the text "Selects" is currently split over two lines
+- [ ] Move the capture folder name (currently in the HUD) to the top bar. Replacing "Capture Folder"
+- [ ] Remove dead space at top of menu bar
+- [ ] Fix thumbnails not showing while higher res image loads
+- [ ] Update the hud styling to match the Mockup_implementation exactly
+- [ ] Clicking an image in main view when multiple images are selected should focus that image (not switch back to single image view)
+- [ ] Allow rating of images with keyboard 1-5
