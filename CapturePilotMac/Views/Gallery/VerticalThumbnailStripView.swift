@@ -176,6 +176,7 @@ struct SidebarThumbnailView: View {
                 .lineLimit(1)
                 .truncationMode(.middle)
         }
+        .padding(.horizontal, 12)
         .opacity(isSelected ? 1.0 : (isHovered ? 0.95 : 0.8))
         .animation(.easeInOut(duration: 0.1), value: isSelected)
         .animation(.easeInOut(duration: 0.1), value: isHovered)

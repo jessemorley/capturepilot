@@ -52,9 +52,25 @@ final class ImageViewerViewModel: ObservableObject {
         galleryVM.variantsModified
             .receive(on: DispatchQueue.main)
             .sink { [weak self] modifiedIDs in
-                guard let self, let current = currentVariant else { return }
+                guard let self, let current = currentVariant else {
+                    print("⚠️ [ImageViewerVM] variantsModified but no currentVariant")
+                    return
+                }
+
+                print("📝 [ImageViewerVM] variantsModified: \(modifiedIDs.count) variants")
+
                 if modifiedIDs.contains(current.id) {
+                    print("✅ [ImageViewerVM] Current variant was modified, updating...")
+                    // Update currentVariant with latest metadata from GalleryViewModel
+                    if let updatedVariant = galleryVM.variant(for: current.id) {
+                        print("📊 [ImageViewerVM] Updating currentVariant rating from \(current.rating) to \(updatedVariant.rating)")
+                        self.currentVariant = updatedVariant
+                    } else {
+                        print("❌ [ImageViewerVM] Could not get updated variant from GalleryVM")
+                    }
                     refreshCurrentImage()
+                } else {
+                    print("ℹ️ [ImageViewerVM] Current variant NOT in modified list")
                 }
             }
             .store(in: &cancellables)
@@ -181,12 +197,29 @@ final class ImageViewerViewModel: ObservableObject {
     // MARK: - Rating and Color Tag
 
     func setRating(_ rating: Int) {
-        guard let variant = currentVariant,
-              rating >= 0 && rating <= 5,
-              galleryVM?.canSetRating == true else { return }
+        guard rating >= 0 && rating <= 5 else {
+            print("❌ Rating out of range: \(rating)")
+            return
+        }
 
+        guard let variant = currentVariant else {
+            print("❌ No current variant")
+            return
+        }
+
+        guard galleryVM?.canSetRating == true else {
+            print("❌ Cannot set rating - permission denied (canSetRating: \(String(describing: galleryVM?.canSetRating)))")
+            return
+        }
+
+        print("✅ Setting rating \(rating) for variant \(variant.name)")
         Task {
-            try? await client.setRating(for: variant, rating: rating)
+            do {
+                try await client.setRating(for: variant, rating: rating)
+                print("✅ Rating set successfully")
+            } catch {
+                print("❌ Failed to set rating: \(error)")
+            }
         }
     }
 

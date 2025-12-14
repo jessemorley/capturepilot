@@ -105,6 +105,7 @@ struct GalleryView: View {
         // Rating (0-5 keys)
         if let char = keyPress.characters.first {
             if let rating = Int(String(char)), rating >= 0 && rating <= 5 {
+                print("Setting rating to \(rating)")  // Debug log
                 viewerVM.setRating(rating)
                 return .handled
             }
@@ -227,12 +228,14 @@ struct SelectsButton: View {
             HStack(spacing: 4) {
                 Image(systemName: "star")
                 Text("Selects")
+                    .lineLimit(1)
                 Text("S")
-                    .font(.system(size: 9, weight: .bold))
+                    .font(.system(size: 12, weight: .medium))
                     .padding(.horizontal, 4)
                     .background(Color.white.opacity(0.2))
                     .cornerRadius(4)
             }
+            .fixedSize()
         }
         .buttonStyle(PillButtonStyle(isActive: isActive))
     }

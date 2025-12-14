@@ -6,7 +6,7 @@ struct RatingColorHUDView: View {
 
     var body: some View {
         if let variant = viewerVM.currentVariant {
-            VStack(spacing: 8) {
+            VStack(spacing: 12) {
                 Text(variant.name)
                     .font(.system(size: 12, weight: .medium))
                     .foregroundColor(.white)

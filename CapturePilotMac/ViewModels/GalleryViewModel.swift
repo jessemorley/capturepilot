@@ -182,6 +182,11 @@ final class GalleryViewModel: ObservableObject {
             }
         }
 
+        if !metadataModified.isEmpty {
+            print("📝 [GalleryVM] Metadata modified for \(metadataModified.count) variants")
+            variantsModified.send(metadataModified)
+        }
+
         print("✅ [GalleryVM] handleServerResponse complete - total variants: \(variants.count)")
     }
 

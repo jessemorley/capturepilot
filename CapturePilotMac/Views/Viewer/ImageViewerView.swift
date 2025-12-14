@@ -124,9 +124,8 @@ struct MultiImageItemView: View {
                 .stroke(isActive ? Color.white : Color.clear, lineWidth: 2)
         )
         .onTapGesture {
-            // Make this image the active one
+            // Make this image the active one (without clearing multi-select)
             galleryVM.activeVariantID = variant.id
-            viewerVM.selectVariantByID(variant.id)
         }
         .onAppear {
             Task {
