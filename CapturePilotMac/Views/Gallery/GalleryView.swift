@@ -105,7 +105,6 @@ struct GalleryView: View {
         // Rating (0-5 keys)
         if let char = keyPress.characters.first {
             if let rating = Int(String(char)), rating >= 0 && rating <= 5 {
-                print("Setting rating to \(rating)")  // Debug log
                 viewerVM.setRating(rating)
                 return .handled
             }
