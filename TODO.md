@@ -1,0 +1,1 @@
+- [ ] The connect button on the first screen should sit on the same line as the address fields

@@ -58,30 +58,40 @@ struct MultiImageView: View {
                 }
                 .padding(5)
             } else {
-                // 4+ images: Grid layout
-                ScrollView {
-                    LazyVGrid(columns: gridColumns, spacing: 5) {
-                        ForEach(variants) { variant in
-                            MultiImageItemView(variant: variant)
-                                .aspectRatio(1, contentMode: .fit)
+                // 4+ images: Grid layout that fills the screen
+                VStack(spacing: 5) {
+                    ForEach(0..<gridRows, id: \.self) { row in
+                        HStack(spacing: 5) {
+                            ForEach(0..<gridColumns, id: \.self) { col in
+                                let index = row * gridColumns + col
+                                if index < variants.count {
+                                    MultiImageItemView(variant: variants[index])
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                } else {
+                                    // Empty spacer for incomplete last row
+                                    Color.clear
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                }
+                            }
                         }
                     }
-                    .padding(5)
                 }
+                .padding(5)
             }
         }
     }
 
-    // Grid columns for 4+ images
-    private var gridColumns: [GridItem] {
+    // Calculate grid dimensions
+    private var gridColumns: Int {
         let count = variants.count
-        if count <= 4 {
-            return Array(repeating: GridItem(.flexible(), spacing: 5), count: 2)
-        } else if count <= 9 {
-            return Array(repeating: GridItem(.flexible(), spacing: 5), count: 3)
-        } else {
-            return Array(repeating: GridItem(.flexible(), spacing: 5), count: 4)
-        }
+        if count <= 4 { return 2 }
+        if count <= 9 { return 3 }
+        return 4
+    }
+
+    private var gridRows: Int {
+        let cols = gridColumns
+        return (variants.count + cols - 1) / cols  // Ceiling division
     }
 }
 
