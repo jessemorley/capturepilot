@@ -20,6 +20,7 @@ struct ImageViewerView: View {
                 if isMultiSelect {
                     // Multi-image grid view
                     MultiImageView(variants: selectedVariants)
+                        .environmentObject(galleryVM)
                 } else {
                     // Single image view
                     if let image = viewerVM.currentImage {
@@ -43,55 +44,80 @@ struct ImageViewerView: View {
 // MARK: - Multi-Image View
 struct MultiImageView: View {
     let variants: [Variant]
+    @EnvironmentObject var galleryVM: GalleryViewModel
 
-    // Determine grid layout based on image count
-    private var columns: [GridItem] {
-        let count = variants.count
-        if count <= 1 {
-            return [GridItem(.flexible())]
-        } else if count <= 4 {
-            return Array(repeating: GridItem(.flexible()), count: 2)
-        } else if count <= 9 {
-            return Array(repeating: GridItem(.flexible()), count: 3)
-        } else {
-            return Array(repeating: GridItem(.flexible()), count: 4)
+    var body: some View {
+        GeometryReader { geometry in
+            if variants.count <= 3 {
+                // 2-3 images: Horizontal flex layout, images fill height
+                HStack(spacing: 5) {
+                    ForEach(variants) { variant in
+                        MultiImageItemView(variant: variant)
+                            .frame(maxHeight: .infinity)
+                    }
+                }
+                .padding(5)
+            } else {
+                // 4+ images: Grid layout
+                ScrollView {
+                    LazyVGrid(columns: gridColumns, spacing: 5) {
+                        ForEach(variants) { variant in
+                            MultiImageItemView(variant: variant)
+                                .aspectRatio(1, contentMode: .fit)
+                        }
+                    }
+                    .padding(5)
+                }
+            }
         }
     }
 
-    var body: some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 5) {
-                ForEach(variants) { variant in
-                    SingleGridItemView(variant: variant)
-                }
-            }
-            .padding(5)
+    // Grid columns for 4+ images
+    private var gridColumns: [GridItem] {
+        let count = variants.count
+        if count <= 4 {
+            return Array(repeating: GridItem(.flexible(), spacing: 5), count: 2)
+        } else if count <= 9 {
+            return Array(repeating: GridItem(.flexible(), spacing: 5), count: 3)
+        } else {
+            return Array(repeating: GridItem(.flexible(), spacing: 5), count: 4)
         }
     }
 }
 
-// MARK: - Single Grid Item View
-struct SingleGridItemView: View {
+// MARK: - Multi Image Item View (used in both flex and grid layouts)
+struct MultiImageItemView: View {
     let variant: Variant
     @EnvironmentObject var galleryVM: GalleryViewModel
     @EnvironmentObject var viewerVM: ImageViewerViewModel
     @State private var image: NSImage?
+
+    private var isActive: Bool {
+        galleryVM.activeVariantID == variant.id
+    }
 
     var body: some View {
         ZStack {
             if let image = image {
                 Image(nsImage: image)
                     .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .layoutPriority(-1)
+                    .aspectRatio(contentMode: .fit)
             } else {
                 Rectangle()
                     .fill(Color(white: 0.1))
                     .overlay(ProgressView())
             }
         }
-        .clipped()
-        .aspectRatio(1, contentMode: .fit) // Square grid item
+        .clipShape(Rectangle()) // Square corners per mockup
+        .overlay(
+            Rectangle()
+                .stroke(isActive ? Color.white : Color.clear, lineWidth: 2)
+        )
+        .onTapGesture {
+            // Make this image the active one
+            galleryVM.activeVariantID = variant.id
+            viewerVM.selectVariantByID(variant.id)
+        }
         .onAppear {
             Task {
                 self.image = await viewerVM.loadImage(for: variant)

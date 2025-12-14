@@ -27,6 +27,27 @@ final class ImageViewerViewModel: ObservableObject {
     private func setupBindings() {
         guard let galleryVM else { return }
 
+        // Sync with activeVariantID changes from GalleryViewModel
+        galleryVM.$activeVariantID
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] activeID in
+                guard let self, let activeID, let galleryVM = self.galleryVM else { return }
+
+                // If in multi-select mode (more than 1 selected), don't load full image
+                // Just update currentVariant without loading
+                if galleryVM.selectedVariantIDs.count > 1 {
+                    if let variant = galleryVM.variant(for: activeID) {
+                        self.currentVariant = variant
+                    }
+                } else {
+                    // Single select - load the full image
+                    if activeID != self.currentVariant?.id {
+                        self.selectVariantByID(activeID)
+                    }
+                }
+            }
+            .store(in: &cancellables)
+
         // Handle modified variants - refresh current image if affected
         galleryVM.variantsModified
             .receive(on: DispatchQueue.main)
@@ -61,6 +82,13 @@ final class ImageViewerViewModel: ObservableObject {
 
         currentVariant = variant
         loadFullImage(for: variant)
+
+        // Also update galleryVM selection to stay in sync
+        if let galleryVM {
+            // When navigating, clear multi-select and set single selection
+            galleryVM.selectedVariantIDs = [variant.id]
+            galleryVM.activeVariantID = variant.id
+        }
     }
 
     func loadImage(for variant: Variant) async -> NSImage? {

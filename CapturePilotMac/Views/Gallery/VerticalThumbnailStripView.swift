@@ -28,16 +28,10 @@ struct SidebarView: View {
                             .environmentObject(galleryVM)
                             .id(variant.id)
                             .onTapGesture {
-                                // A regular tap, not a command-click
-                                galleryVM.selectVariant(variant, isCommandPressed: false)
+                                // Check if Command key is pressed
+                                let isCommandPressed = NSEvent.modifierFlags.contains(.command)
+                                galleryVM.selectVariant(variant, isCommandPressed: isCommandPressed)
                             }
-                            .simultaneousGesture(
-                                TapGesture(count: 1).modifiers(.command)
-                                    .onEnded { _ in
-                                        // A command-click
-                                        galleryVM.selectVariant(variant, isCommandPressed: true)
-                                    }
-                            )
                         }
                     }
                     .padding(.horizontal, 12)
