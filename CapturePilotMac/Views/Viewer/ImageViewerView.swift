@@ -23,7 +23,7 @@ struct ImageViewerView: View {
                         .environmentObject(galleryVM)
                 } else {
                     // Single image view
-                    if let image = viewerVM.currentImage {
+                    if let image = viewerVM.displayImage {
                         Image(nsImage: image)
                             .resizable()
                             .aspectRatio(contentMode: .fit)
@@ -101,15 +101,20 @@ struct MultiImageItemView: View {
     @EnvironmentObject var galleryVM: GalleryViewModel
     @EnvironmentObject var viewerVM: ImageViewerViewModel
     @State private var image: NSImage?
+    @State private var placeholderImage: NSImage?
 
     private var isActive: Bool {
         galleryVM.activeVariantID == variant.id
     }
 
+    private var displayImage: NSImage? {
+        image ?? placeholderImage
+    }
+
     var body: some View {
         ZStack {
-            if let image = image {
-                Image(nsImage: image)
+            if let displayImage {
+                Image(nsImage: displayImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
             } else {
@@ -128,6 +133,11 @@ struct MultiImageItemView: View {
             galleryVM.activeVariantID = variant.id
         }
         .onAppear {
+            // Immediately show cached thumbnail as placeholder
+            Task {
+                placeholderImage = await viewerVM.getCachedThumbnail(for: variant.id)
+            }
+            // Then load full resolution
             Task {
                 self.image = await viewerVM.loadImage(for: variant)
             }

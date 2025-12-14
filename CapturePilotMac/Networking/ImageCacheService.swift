@@ -81,6 +81,13 @@ actor ImageCacheService {
         return nil
     }
 
+    // MARK: - Cache Retrieval
+
+    func getCachedThumbnail(for variantID: UUID) -> NSImage? {
+        let cacheKey = NSString(string: "thumb_\(variantID.uuidString)")
+        return thumbnailCache.object(forKey: cacheKey)
+    }
+
     // MARK: - Cache Management
 
     func invalidateThumbnail(for variantID: UUID) {

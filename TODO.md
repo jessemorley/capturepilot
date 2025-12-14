@@ -5,7 +5,7 @@
 - [ ] Move the image name to an overlay, instead of below image and increase vertical spacing
     - [ ] Settings: Add option to show/hide images names in filmstrip
 - [ ] Remove dead space at top of menu bar
-- [ ] Fix thumbnails not showing while higher res image loads
+- [x] Fix thumbnails not showing while higher res image loads
 - [ ] Bug: Settings: The thumbnail size dropdown isn't working
 - [ ] Multi-image view bug: Before new image loads, selection highlight surrounds whole div
 - [ ] Bug: Session not detected via Bonjour (it's launched on the local machine, which could be causing issues. Network permission has been granted in system prefs)

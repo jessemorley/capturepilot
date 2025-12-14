@@ -5,7 +5,12 @@ import Combine
 final class ImageViewerViewModel: ObservableObject {
     @Published private(set) var currentVariant: Variant?
     @Published private(set) var currentImage: NSImage?
+    @Published private(set) var placeholderImage: NSImage?
     @Published private(set) var isLoadingImage = false
+
+    var displayImage: NSImage? {
+        currentImage ?? placeholderImage
+    }
 
     private let client: CapturePilotClient
     private let imageCache: ImageCacheService
@@ -86,6 +91,12 @@ final class ImageViewerViewModel: ObservableObject {
         guard variant.id != currentVariant?.id else { return }
 
         currentVariant = variant
+
+        // Immediately show cached thumbnail as placeholder while loading full-res
+        Task {
+            placeholderImage = await imageCache.getCachedThumbnail(for: variant.id)
+        }
+
         loadFullImage(for: variant)
 
         // Also update galleryVM selection to stay in sync
@@ -116,6 +127,7 @@ final class ImageViewerViewModel: ObservableObject {
     private func loadFullImage(for variant: Variant) {
         loadingTask?.cancel()
         isLoadingImage = true
+        currentImage = nil
 
         loadingTask = Task {
             // Get screen size for optimal resolution
@@ -130,6 +142,7 @@ final class ImageViewerViewModel: ObservableObject {
             if let image = await imageCache.loadPreview(for: variant, size: requestSize, client: client) {
                 if !Task.isCancelled {
                     currentImage = image
+                    placeholderImage = nil  // Clear placeholder now that we have full-res
                 }
             }
 
@@ -202,6 +215,12 @@ final class ImageViewerViewModel: ObservableObject {
         Task {
             try? await client.setColorTag(for: variant, colorTag: colorTag)
         }
+    }
+
+    // MARK: - Thumbnail Access
+
+    func getCachedThumbnail(for variantID: UUID) async -> NSImage? {
+        await imageCache.getCachedThumbnail(for: variantID)
     }
 
     // MARK: - State
